@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Portfolio</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="mediaqueries.css" />
+</head>
+<body>
+    <div class="container">
+        <div class="menu-bar">
+            <div class="menu-icon"></div>
+        </div>
+        <div class="chat-container">
+            <div class="chat-window">
+                <div class="chat-header">
+                    <h1>Student Information Chatbot</h1>
+                </div>
+                <div id="chat-history" class="chat-messages"></div>
+                <div class="chat-input">
+                    <input id="user-input" type="text" placeholder="Type your message here..." />
+                    <button id="submit-btn" class="send-button">Send</button>
+                </div>
+            </div>
+            <div class="actions">
+                <button class="action-button mic"><img src="mic-icon.png" alt="Mic Icon"></button>
+                <button class="action-button camera"><img src="camera-icon.png" alt="Camera Icon"></button>
+                <button class="action-button upload"><img src="upload-icon.png" alt="Upload Icon"></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const userInput = document.getElementById('user-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const chatHistory = document.getElementById('chat-history');
+
+        submitBtn.addEventListener('click', async () => {
+            const query = userInput.value.trim();
+            if (query) {
+                try {
+                    const response = await fetch('https://chatbot-v1-ryp3.onrender.com/get_student_info', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ prompt: query })
+                    });
+                    const data = await response.json();
+
+                    if ('response' in data) {
+                        addMessageToHistory(query, data.response);
+                    } else if ('error' in data) {
+                        addMessageToHistory(query, `Error: ${data.error}`);
+                    } else {
+                        addMessageToHistory(query, 'An error occurred while processing the request.');
+                    }
+                } catch (error) {
+                    addMessageToHistory(query, `Error: ${error.message}`);
+                }
+            } else {
+                addMessageToHistory('', 'Please enter a query.');
+            }
+            userInput.value = '';
+        });
+
+        function addMessageToHistory(userMessage, botMessage) {
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.classList.add('user-message');
+            userMessageDiv.textContent = userMessage;
+            chatHistory.appendChild(userMessageDiv);
+
+            const botMessageDiv = document.createElement('div');
+            botMessageDiv.classList.add('bot-message');
+            botMessageDiv.textContent = botMessage;
+            chatHistory.appendChild(botMessageDiv);
+        }
+    </script>
+</body>
+</html>
+
+
